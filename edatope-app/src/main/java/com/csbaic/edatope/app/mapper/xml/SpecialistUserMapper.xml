@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.SpecialistUserMapper">
+
+
+    <select id="specialistUserPage" resultType="com.csbaic.edatope.app.entity.SpecialistUser">
+        select a.*
+        from sys_specialist_user a
+        left join sys_user b on a.user_id = b.id
+        left join sys_organization c on b.org_id = c.id
+        <where>
+            a.deleted = 0 and b.deleted = 0 and c.deleted = 0
+            <if test="null != query.userName and '' != query.userName">
+                and b.nick_name like concat('%',#{query.userName},'%')
+            </if>
+            <if test="null != query.phone and '' != query.phone">
+                and b.mobile like concat('%',#{query.phone},'%')
+            </if>
+            <if test="null != query.orgName and '' != query.orgName">
+                and c.name like concat('%',#{query.orgName},'%')
+            </if>
+            <if test="null != query.nature and '' != query.nature">
+                and a.nature = #{query.nature}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.BlockMapper">
+
+    <resultMap id="BlockDetail" type="com.csbaic.edatope.app.entity.Block" autoMapping="true">
+        <id column="id" property="id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <association property="project" column="project_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.ProjectMapper.selectById"/>
+        <association property="enterprise" column="enterprise_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.EnterpriseMapper.selectById"/>
+        <association property="workStageList" column="id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.BlockWorkStageMapper.listByBlockId"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="BlockDetail">
+        SELECT
+        b.*
+        FROM sys_block b
+        LEFT JOIN sys_project p ON p.id = b.project_id
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id
+        <if test="query.phaseType !=null and query.phaseType != ''">
+            left join sys_block_work_stage s on b.id = s.block_id
+        </if>
+        <where>
+            b.deleted = 0
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.enterpriseName != null and query.enterpriseName != ''">
+                AND e.name LIKE CONCAT('%', #{query.enterpriseName}, '%')
+            </if>
+            <if test="query.enterpriseType != null and query.enterpriseType != ''">
+                AND e.type = #{query.enterpriseType}
+            </if>
+            <if test="query.enterpriseCategory != null and query.enterpriseCategory.size() > 0">
+                AND
+                <foreach collection="query.enterpriseCategory" open="(" close=")" item="category" index="index">
+
+                    <choose>
+                        <when test="index >= 1">
+                            OR e.category LIKE CONCAT('%', #{category}, '%')
+                        </when>
+                        <otherwise>
+                            e.category LIKE CONCAT('%', #{category}, '%')
+                        </otherwise>
+                    </choose>
+
+                </foreach>
+            </if>
+            <if test="query.provinceCode != null and query.provinceCode != ''">
+                and b.province_code = #{query.provinceCode}
+            </if>
+            <if test="query.cityCode != null and query.cityCode != ''">
+                and b.city_code = #{query.cityCode}
+            </if>
+            <if test="query.districtCode != null and query.districtCode != ''">
+                and b.district_code = #{query.districtCode}
+            </if>
+            <if test="query.projectName != null and query.projectName != ''">
+                AND p.name LIKE CONCAT('%', #{query.projectName}, '%')
+            </if>
+            <if test="query.orgId != null and query.orgId != ''">
+                AND p.org_id = #{query.orgId}
+            </if>
+            <if test="query.phaseType !=null and query.phaseType != ''">
+                AND s.work_stage_id = #{query.phaseType} and s.deleted = 0
+            </if>
+        </where>
+    </select>
+    <select id="getDetailById" resultMap="BlockDetail">
+        SELECT b.*
+        FROM sys_block b
+        WHERE b.id = #{id}
+          AND b.deleted = 0
+    </select>
+
+    <select id="list" resultMap="BlockDetail">
+        SELECT
+        b.*
+        FROM sys_block b
+        LEFT JOIN sys_project p ON p.id = b.project_id
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id
+        <where>
+            b.deleted = 0
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.enterpriseName != null and query.enterpriseName != ''">
+                AND e.name LIKE CONCAT('%', #{query.enterpriseName}, '%')
+            </if>
+            <if test="query.enterpriseType != null and query.enterpriseType != ''">
+                AND e.type = #{query.enterpriseType}
+            </if>
+            <if test="query.enterpriseCategory != null and query.enterpriseCategory.size() > 0">
+                AND
+                <foreach collection="query.enterpriseCategory" open="(" close=")" item="category">
+                    <choose>
+                        <when test="index >= 1">
+                            OR e.category LIKE CONCAT('%', #{category}, '%')
+                        </when>
+                        <otherwise>
+                            e.category LIKE CONCAT('%', #{category}, '%')
+                        </otherwise>
+                    </choose>
+                </foreach>
+            </if>
+            <if test="query.provinceCode != null and query.provinceCode != ''">
+                and b.province_code = #{query.provinceCode}
+            </if>
+            <if test="query.cityCode != null and query.cityCode != ''">
+                and b.city_code = #{query.cityCode}
+            </if>
+            <if test="query.districtCode != null and query.districtCode != ''">
+                and b.district_code = #{query.districtCode}
+            </if>
+            <if test="query.projectName != null and query.projectName != ''">
+                AND p.name LIKE CONCAT('%', #{query.projectName}, '%')
+            </if>
+            <if test="query.orgId != null and query.orgId != ''">
+                AND p.org_id = #{query.orgId}
+            </if>
+        </where>
+    </select>
+    <select id="listByEnterpriseId" resultMap="BlockDetail">
+        SELECT b.*
+        FROM sys_block b
+        WHERE b.enterprise_id = #{enterpriseId}
+          AND b.deleted = 0
+
+    </select>
+    <select id="listByProjectId" resultMap="BlockDetail">
+        SELECT b.*
+        FROM sys_block b
+        WHERE b.project_id = #{projectId}
+          AND b.deleted = 0
+    </select>
+    <select id="pointUserListPage" resultMap="BlockDetail">
+        SELECT
+        distinct b.*
+        FROM sys_block b
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id
+        left join sys_survey_tasks st on st.block_id = b.id
+        # left join sys_point_user_tasks pu on pu.block_id = b.id
+        <if test="query.phaseType !=null and query.phaseType != ''">
+            left join sys_block_work_stage s on b.id = s.block_id
+        </if>
+        <where>
+            b.deleted = 0
+            and st.type = 'D001-004'
+            <!--            <if test="query.status != null and query.status != ''">-->
+            <!--                and pu.status in ${query.status}-->
+            <!--            </if>-->
+            <if test="query.orgId != null and query.orgId != ''">
+                and st.org_id = #{query.orgId}
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.enterpriseName != null and query.enterpriseName != ''">
+                AND e.name LIKE CONCAT('%', #{query.enterpriseName}, '%')
+            </if>
+            <if test="query.provinceCode != null and query.provinceCode != ''">
+                and b.province_code = #{query.provinceCode}
+            </if>
+            <if test="query.cityCode != null and query.cityCode != ''">
+                and b.city_code = #{query.cityCode}
+            </if>
+            <if test="query.districtCode != null and query.districtCode != ''">
+                and b.district_code = #{query.districtCode}
+            </if>
+            <if test="query.phaseType !=null and query.phaseType != ''">
+                AND s.work_stage_id = #{query.phaseType} and s.deleted = 0
+            </if>
+        </where>
+    </select>
+
+    <select id="pointUserTaskListPage" resultMap="BlockDetail">
+        SELECT
+        distinct b.*
+        FROM sys_block b
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id
+        left join sys_survey_tasks st on st.block_id = b.id
+        left join sys_point_user_tasks pu on pu.block_id = b.id
+        <if test="query.phaseType !=null and query.phaseType != ''">
+            left join sys_block_work_stage s on b.id = s.block_id
+        </if>
+        <where>
+            b.deleted = 0
+            and st.type = 'D001-004'
+            <if test="query.status != null and query.status != ''">
+                and pu.deploy_point_status in ${query.status}
+            </if>
+            <if test="query.taskStatus != null and query.taskStatus != ''">
+                and pu.deploy_point_status = #{query.taskStatus}
+            </if>
+            <if test="query.orgId != null and query.orgId != ''">
+                and st.org_id = #{query.orgId}
+            </if>
+            <if test="query.userId != null and query.userId != ''">
+                and pu.user_id = #{query.userId}
+            </if>
+            <if test="query.deployPointStatusList != null and query.deployPointStatusList.size() > 0">
+                AND pu.deploy_point_status in
+                <foreach collection="query.deployPointStatusList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.enterpriseName != null and query.enterpriseName != ''">
+                AND e.name LIKE CONCAT('%', #{query.enterpriseName}, '%')
+            </if>
+            <if test="query.provinceCode != null and query.provinceCode != ''">
+                and b.province_code = #{query.provinceCode}
+            </if>
+            <if test="query.cityCode != null and query.cityCode != ''">
+                and b.city_code = #{query.cityCode}
+            </if>
+            <if test="query.districtCode != null and query.districtCode != ''">
+                and b.district_code = #{query.districtCode}
+            </if>
+            <if test="query.phaseType !=null and query.phaseType != ''">
+                AND s.work_stage_id = #{query.phaseType} and s.deleted = 0
+            </if>
+        </where>
+    </select>
+
+
+    <select id="qualityControlTaskPage" resultMap="BlockDetail">
+        SELECT DISTINCT
+        b.*
+        FROM
+        sys_block b
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id and e.deleted = 0
+        left join sys_project pr on b.project_id = pr.id and pr.deleted = 0
+        <where>
+            b.deleted = 0
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <include refid="query"></include>
+            <if test="query.authOrgIdList != null and query.authOrgIdList.size() > 0">
+                AND pr.org_id in
+                <foreach collection="query.authOrgIdList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="query.provinceCodeList != null and query.provinceCodeList.size() > 0">
+                AND b.${query.areaCodeColumn} in
+                <foreach collection="query.provinceCodeList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="sendBackPage" resultMap="BlockDetail">
+        SELECT DISTINCT
+        b.*
+        FROM
+        sys_block b
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id and e.deleted = 0
+        LEFT JOIN sys_quality_control_tasks qc ON qc.block_id = b.id and qc.deleted = 0
+        left join sys_project pr on b.project_id = pr.id and pr.deleted = 0
+        <where>
+            b.deleted = 0
+            and qc.distribute_status = 'ALLOCATED'
+            <if test="query.code != null and query.code != ''">
+                AND b.code = #{query.code}
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <include refid="query"></include>
+            <if test="query.authOrgIdList != null and query.authOrgIdList.size() > 0">
+                AND pr.org_id in
+                <foreach collection="query.authOrgIdList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="query.provinceCodeList != null and query.provinceCodeList.size() > 0">
+                AND b.${query.areaCodeColumn} in
+                <foreach collection="query.provinceCodeList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="specialistPage" resultMap="BlockDetail">
+        SELECT DISTINCT
+        b.*
+        FROM
+        sys_block b
+        LEFT JOIN sys_enterprise e ON e.id = b.enterprise_id and e.deleted = 0
+        LEFT JOIN sys_quality_control_tasks qc ON qc.block_id = b.id and qc.deleted = 0
+        left join sys_project pr on b.project_id = pr.id and pr.deleted = 0
+        <if test="query.quailtyBack">
+            INNER JOIN sys_organization o ON o.id = pr.org_id
+        </if>
+        <where>
+            b.deleted = 0
+            and qc.distribute_status = 'ALLOCATED'
+            <if test="query.pointQualityOrgId != null and query.pointQualityOrgId != ''">
+                AND qc.point_quality_org_id = #{query.pointQualityOrgId}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and qc.distribute_specialist_status in ${query.status}
+            </if>
+            <if test="query.opinionStatus != null and query.opinionStatus != ''">
+                and qc.audit_status in ${query.opinionStatus}
+            </if>
+            <if test="query.quailtyBack">
+                and o.service_level = qc.quality_type
+                and qc.audit_status in ('D020-001','D020-002','D020-003','D020-006','D020-009','D020-0011')
+            </if>
+            <if test="query.qualitySpecialistId != null and query.qualitySpecialistId.size() > 0">
+                AND qc.quality_specialist_id IN
+                <foreach collection="query.qualitySpecialistId" separator="," open="(" close=")" item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <include refid="query"></include>
+        </where>
+    </select>
+
+    <sql id="query">
+        <if test="query.code != null and query.code != ''">
+            AND b.code = #{query.code}
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND b.name LIKE CONCAT('%', #{query.name}, '%')
+        </if>
+        <if test="query.enterpriseName != null and query.enterpriseName != ''">
+            AND e.name LIKE CONCAT('%', #{query.enterpriseName}, '%')
+        </if>
+        <if test="query.provinceCode != null and query.provinceCode != ''">
+            and b.province_code = #{query.provinceCode}
+        </if>
+        <if test="query.cityCode != null and query.cityCode != ''">
+            and b.city_code = #{query.cityCode}
+        </if>
+        <if test="query.districtCode != null and query.districtCode != ''">
+            and b.district_code = #{query.districtCode}
+        </if>
+    </sql>
+</mapper>

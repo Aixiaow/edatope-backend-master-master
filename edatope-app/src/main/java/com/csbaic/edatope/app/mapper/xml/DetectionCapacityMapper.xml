@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.DetectionCapacityMapper">
+
+    <resultMap id="detectionCapacityDetail" type="com.csbaic.edatope.app.entity.DetectionCapacity" autoMapping="true">
+        <id column="id" property="id"/>
+
+    </resultMap>
+
+    <select id="listPage" resultMap="detectionCapacityDetail">
+        <include refid="ListCapacity"/>
+    </select>
+
+    <select id="listAll" resultMap="detectionCapacityDetail">
+        <include refid="ListCapacity"/>
+    </select>
+
+    <sql id="ListCapacity">
+        SELECT DISTINCT dc.* FROM sys_detection_capacity dc
+        left join sys_organization o on dc.laboratory = o.id
+        <where>
+            <if test="query.targetName != null and query.targetName != ''">
+                and dc.target_name LIKE CONCAT('%', #{query.targetName}, '%')
+            </if>
+            <if test="query.targetType != null and query.targetType != ''">
+                and dc.target_type = #{query.targetType}
+            </if>
+            <if test="query.sampleType != null and query.sampleType != ''">
+                and dc.sample_type = #{query.sampleType}
+            </if>
+            <if test="query.standard != null and query.standard != ''">
+                and dc.standard = #{query.standard}
+            </if>
+            <if test="query.laboratory != null and query.laboratory != ''">
+                and o.id = #{query.laboratory}
+            </if>
+            <if test="query.volatilize != null and query.volatilize != ''">
+                and dc.volatilize = #{query.volatilize}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and dc.status = #{query.status}
+            </if>
+            and dc.deleted = 0
+        </where>
+    </sql>
+</mapper>

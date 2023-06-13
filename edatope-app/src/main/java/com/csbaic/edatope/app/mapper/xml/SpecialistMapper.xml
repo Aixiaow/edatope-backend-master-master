@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.SpecialistMapper">
+
+    <select id="pointSpecialistTaskPage" resultType="com.csbaic.edatope.app.entity.Specialist">
+        select
+        distinct a.*
+        from sys_specialist a
+        left join sys_specialist_user b on a.id = b.specialist_id
+        inner join sys_user c on b.user_id = c.id
+        <where>
+            a.deleted = 0 and a.status = 'NORMAL'
+            <if test="query.groupName != null and query.groupName != ''">
+                and a.group_name like concat('%', #{query.groupName},'%')
+            </if>
+            <if test="query.groupUserName != null and query.groupUserName != ''">
+                and c.username like concat('%', #{query.groupUserName},'%')
+            </if>
+            <if test="query.specialistUserId != null and query.specialistUserId != ''">
+                and b.id = #{query.specialistUserId}
+            </if>
+        </where>
+    </select>
+    <select id="page" resultType="com.csbaic.edatope.app.model.dto.SpecialistPageResultVO">
+        select
+        distinct a.id,a.group_name groupName,a.status,a.group_user_name groupUserName,b.user_id groupLeaderUserId
+        from sys_specialist a
+        inner join sys_specialist_user b on a.id = b.specialist_id
+        inner join sys_user c on b.user_id = c.id
+        <where>
+            a.deleted = 0 and b.deleted = 0 and b.nature = "D021-001"
+            <if test="query.groupName != null and query.groupName != ''">
+                and a.group_name like concat('%', #{query.groupName},'%')
+            </if>
+            <if test="query.groupLeaderName != null and query.groupLeaderName != ''">
+                and c.username like concat('%', #{query.groupLeaderName},'%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and a.status = #{query.status}
+            </if>
+        </where>
+    </select>
+</mapper>

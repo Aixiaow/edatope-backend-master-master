@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.DeviceAuthorizeMapper">
+
+    <resultMap id="DeviceAuthorizeDetail" type="com.csbaic.edatope.app.entity.DeviceAuthorize" autoMapping="true">
+        <id property="id" column="id"/>
+        <result column="org_id" property="orgId"/>
+        <result column="user_id" property="userId"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="authorizer_id" property="authorizerId"/>
+        <association property="organization" column="org_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.OrganizationMapper.selectById"/>
+        <association property="user" column="user_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.UserMapper.selectById"/>
+        <association property="device" column="device_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.DeviceMapper.selectById"/>
+        <association property="authorizer" column="authorizer_id" autoMapping="true"
+                     select="com.csbaic.edatope.app.mapper.UserMapper.selectById"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="DeviceAuthorizeDetail">
+        SELECT * FROM sys_device_authorize a
+        LEFT JOIN sys_organization o ON o.id = a.org_id
+        LEFT JOIN sys_user u ON u.id = a.user_id
+        LEFT JOIN sys_device d ON d.id = a.device_id
+        <where>
+            a.deleted = 0
+            <if test="query.organizationName and query.organizationName != ''">
+                AND o.name LIKE CONCAT('%', #{query.organizationName}, '%')
+            </if>
+            <if test="query.userName and query.userName != ''">
+                AND u.nick_name LIKE CONCAT('%', #{query.userName}, '%')
+            </if>
+            <if test="query.mobile and query.mobile != ''">
+                AND u.mobile LIKE CONCAT('%', #{query.mobile}, '%')
+            </if>
+            <if test="query.identifier and query.identifier != ''">
+                AND d.identifier = #{query.identifier}
+            </if>
+        </where>
+    </select>
+</mapper>

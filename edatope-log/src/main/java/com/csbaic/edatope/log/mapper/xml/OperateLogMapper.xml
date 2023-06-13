@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.log.mapper.OperateLogMapper">
+
+    <select id="listOperateLog" resultType="com.csbaic.edatope.log.entity.OperateLog">
+        SELECT
+        t.id,
+        t.log_type,
+        t.module,
+        t.operator_id,
+        t.operator_name,
+        t.operate_type,
+        t.operate_time,
+        t.remark,
+        t.target_id,
+        t.target_name
+        FROM sys_operate_log t
+        <where>
+            <if test="query.logType != null">
+                AND t.log_type = #{query.logType}
+            </if>
+
+            <if test="query.module != null">
+                AND t.module = #{query.module}
+            </if>
+
+            <if test="query.operateType != null">
+                AND t.operate_type = #{query.operateType}
+            </if>
+
+            <if test="query.targetId != null">
+                AND t.target_id = #{query.targetId}
+            </if>
+
+            <if test="query.beginOperateTime != null">
+                AND t.operate_time >= #{query.beginOperateTime}
+            </if>
+
+            <if test="query.endOperateTime != null">
+                AND t.operate_time >= #{query.endOperateTime}
+            </if>
+
+            AND t.deleted = 0
+        </where>
+
+
+    </select>
+</mapper>

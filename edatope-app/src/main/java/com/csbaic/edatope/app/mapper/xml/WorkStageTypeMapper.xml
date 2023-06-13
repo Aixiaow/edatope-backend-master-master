@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.WorkStageTypeMapper">
+
+    <select id="listWorkStageBizType" resultType="com.csbaic.edatope.app.entity.WorkStageType">
+        SELECT *
+        FROM sys_work_stage_type
+        WHERE deleted = 0
+          AND stage_id = #{stageId};
+    </select>
+</mapper>

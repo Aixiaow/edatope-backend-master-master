@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.DetectionTargetMapper">
+
+    <resultMap id="targetDetail" type="com.csbaic.edatope.app.entity.DetectionTarget" autoMapping="true">
+        <id column="id" property="id"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="targetDetail">
+        <include refid="ListTarget"/>
+    </select>
+
+    <sql id="ListTarget">
+        SELECT DISTINCT o.* FROM sys_detection_target o
+        <where>
+            <if test="query.name != null and query.name != ''">
+                and o.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and o.status = #{query.status}
+            </if>
+            <if test="query.targetNumber != null and query.targetNumber != ''">
+                and o.target_number = #{query.targetNumber}
+            </if>
+            <if test="query.targetType != null and query.targetType != ''">
+                and o.target_type = #{query.targetType}
+            </if>
+            <if test="query.sampleType != null and query.sampleType != ''">
+                and o.sample_type = #{query.sampleType}
+            </if>
+            <if test="query.volatilize != null and query.volatilize != ''">
+                and o.volatilize = #{query.volatilize}
+            </if>
+            and o.deleted = 0
+        </where>
+    </sql>
+
+    <select id="listAll" resultMap="targetDetail">
+        <include refid="selectListAll"/>
+    </select>
+
+    <sql id="selectListAll">
+        SELECT DISTINCT o.* FROM sys_detection_target o
+        <where>
+            <if test="query.nameList != null and query.nameList != ''">
+                and o.name REGEXP CONCAT_WS('|',
+                <foreach collection="query.nameList" item="name" open="" close="" separator=",">
+                    #{name}
+                </foreach>
+                )
+            </if>
+            <if test="query.sampleType != null and query.sampleType != ''">
+                and o.sample_type = #{query.sampleType}
+            </if>
+            <if test="query.volatilize != null and query.volatilize != ''">
+                and o.volatilize = #{query.volatilize}
+            </if>
+            and o.status = 'NORMAL' and o.deleted = 0
+        </where>
+    </sql>
+</mapper>

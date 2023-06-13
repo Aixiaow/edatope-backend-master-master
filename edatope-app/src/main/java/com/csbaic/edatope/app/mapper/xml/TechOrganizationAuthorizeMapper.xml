@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.TechOrganizationAuthorizeMapper">
+
+    <select id="getOrgIdByCityAndOwnId" resultType="java.lang.String">
+        select distinct a.org_id orgId
+        from sys_tech_organization_authorize a
+        inner join sys_tech_organization_authorize_city b
+        on a.id = b.authorize_id
+        <where>
+            a.deleted = 0 and b.deleted = 0
+            <if test="ownerId != null and ownerId != ''">
+                and a.owner_id = #{ownerId}
+            </if>
+            <if test="provinceCode != null and provinceCode != ''">
+                and b.province_code = #{provinceCode}
+            </if>
+            <if test="cityCode != null and cityCode != ''">
+                and b.city_code = #{cityCode}
+            </if>
+            <if test="districtCode != null and districtCode != ''">
+                and b.district_code = #{districtCode}
+            </if>
+        </where>
+    </select>
+</mapper>

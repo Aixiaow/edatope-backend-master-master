@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>com.csbaic</groupId>
+        <artifactId>edatope-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../edatope-parent/pom.xml</relativePath>
+    </parent>
+
+    <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>edatope-notification</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>com.csbaic</groupId>
+                <artifactId>edatope-dependencies</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+    </dependency>
+</dependencies>
+        </dependencyManagement>
+
+<dependencies>
+
+
+</dependencies>
+
+</project>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.WorkStageMapper">
+
+    <resultMap id="workStageDetail" type="com.csbaic.edatope.app.entity.WorkStage" autoMapping="true">
+        <id column="id" property="id"/>
+        <collection property="bizType" column="id" autoMapping="true"
+                    select="com.csbaic.edatope.app.mapper.WorkStageTypeMapper.listWorkStageBizType">
+
+        </collection>
+    </resultMap>
+
+    <select id="listPage" resultMap="workStageDetail">
+        <include refid="ListWorkStage"/>
+    </select>
+
+    <select id="listAll" resultMap="workStageDetail">
+        <include refid="ListWorkStage"/>
+    </select>
+
+    <sql id="ListWorkStage">
+        SELECT DISTINCT o.* FROM sys_work_stage o
+        <where>
+            <if test="query.name != null and query.name != ''">
+                and o.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and o.status = #{query.status}
+            </if>
+            and o.deleted = 0
+        </where>
+    </sql>
+</mapper>

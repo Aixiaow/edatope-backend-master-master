@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.OrganizationMapper">
+
+    <resultMap id="OrganizationDetail" type="com.csbaic.edatope.app.entity.Organization" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="pid" property="pid"/>
+        <collection property="bizType" column="id" autoMapping="true"
+                    select="com.csbaic.edatope.app.mapper.OrganizationBizTypeMapper.listOrganizationBizType">
+
+        </collection>
+    </resultMap>
+
+    <sql id="ListOrganization">
+        SELECT DISTINCT o.* FROM sys_organization o
+        <if test="query.bizType != null and query.bizType.size() > 0">
+            LEFT JOIN sys_organization_biz_type biz ON biz.org_id = o.id
+        </if>
+
+        <where>
+            <if test="query.name != null and query.name != ''">
+                and o.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.category != null and query.category != ''">
+                and o.category = #{query.category}
+            </if>
+            <if test="query.provinceCode != null and query.provinceCode != ''">
+                and o.province_code = #{query.provinceCode}
+            </if>
+            <if test="query.cityCode != null and query.cityCode != ''">
+                and o.city_code = #{query.cityCode}
+            </if>
+            <if test="query.districtCode != null and query.districtCode != ''">
+                and o.district_code = #{query.districtCode}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                and o.status = #{query.status}
+            </if>
+            <if test="query.pid != null and query.pid != ''">
+                and o.pid = #{query.pid}
+            </if>
+            <if test="query.bizType != null and query.bizType.size() > 0">
+                and biz.biz_type IN
+                <foreach collection="query.bizType" separator="," open="(" close=")" item="bizType">
+                    #{bizType}
+                </foreach>
+            </if>
+            <if test="query.bizType != null and query.bizType.size() > 0">
+                and biz.deleted = 0
+            </if>
+            and o.deleted = 0
+        </where>
+    </sql>
+
+    <select id="listPage" resultMap="OrganizationDetail">
+        <include refid="ListOrganization"/>
+    </select>
+
+    <select id="list" resultMap="OrganizationDetail">
+        <include refid="ListOrganization"/>
+    </select>
+
+    <select id="getDetail" resultMap="OrganizationDetail">
+        SELECT o.*
+        FROM sys_organization o
+        WHERE o.deleted = 0
+          and o.id = #{id}
+    </select>
+
+    <select id="qualityControlOrgPage" resultMap="OrganizationDetail">
+        SELECT DISTINCT
+            a.*
+        FROM
+            sys_organization a
+            INNER JOIN sys_user b ON a.id = b.org_id
+            INNER JOIN sys_organization_biz_type c ON a.id = c.org_id
+        <where>
+            b.type = 'D011-002'
+            AND c.biz_type = 'D001-007'
+            AND b.deleted = 0
+            AND a.deleted = 0
+            AND c.deleted = 0
+            <if test="query.orgName != null and query.orgName != ''">
+                and a.name like concat('%',#{query.orgName},'%')
+            </if>
+            <if test="query.orgUserName != null and query.orgUserName != ''">
+                and b.username like concat('%',#{query.orgUserName},'%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                and b.mobile = #{query.phone}
+            </if>
+            <if test="query.ownerId != null and query.ownerId != ''">
+                and a.pid = #{query.ownerId}
+            </if>
+<!--            <if test="query.serviceLevel != null and query.serviceLevel != ''">-->
+<!--                and d.service_level = #{query.serviceLevel}-->
+<!--            </if>-->
+        </where>
+    </select>
+
+
+</mapper>

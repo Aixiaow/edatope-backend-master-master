@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csbaic.edatope.app.mapper.UserMapper">
+
+    <resultMap id="UserDetail" type="com.csbaic.edatope.app.entity.User" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="orgId" column="org_id"/>
+        <association property="org" column="org_id"
+                     select="com.csbaic.edatope.app.mapper.OrganizationMapper.selectById"/>
+        <collection property="roles" column="id" autoMapping="true"
+                    select="com.csbaic.edatope.app.mapper.RoleMapper.getRolesByUserId"/>
+    </resultMap>
+
+    <select id="getByUsernameOrMobile" resultType="com.csbaic.edatope.app.entity.User">
+        SELECT *
+        FROM sys_user u
+        WHERE u.username = #{text}
+           OR u.mobile = #{text}
+            AND u.deleted = 0
+    </select>
+
+
+    <select id="listUser" resultMap="UserDetail">
+        SELECT DISTINCT u.* FROM sys_user u
+        LEFT JOIN sys_acl_user_role ur ON ur.user_id = u.id
+        <where>
+            <if test="query.nickName != null">
+                AND u.nick_name LIKE CONCAT('%', #{query.nickName}, '%')
+            </if>
+            <if test="query.username != null">
+                AND u.username = #{query.username}
+            </if>
+            <if test="query.mobile != null">
+                AND u.mobile LIKE CONCAT('%', #{query.mobile}, '%')
+            </if>
+            <if test="query.locked != null">
+                AND u.locked = #{query.locked}
+            </if>
+            <if test="query.status != null">
+                AND u.status = #{query.status}
+            </if>
+            <if test="query.type != null">
+                AND u.type = #{query.type}
+            </if>
+            <if test="query.roles != null and query.roles.size() > 0">
+                AND ur.role_id IN
+                <foreach collection="query.roles" separator="," open="(" close=")" item="roleId">
+                    #{roleId}
+                </foreach>
+            </if>
+            <if test="query.orgIds != null and query.orgIds.size() > 0">
+                AND u.org_id IN
+                <foreach collection="query.orgIds" separator="," open="(" close=")" item="orgId">
+                    #{orgId}
+                </foreach>
+            </if>
+            AND u.deleted = 0
+        </where>
+        ORDER BY u.create_time DESC
+
+    </select>
+    <select id="getUserDetail" resultMap="UserDetail">
+        SELECT *
+        FROM sys_user u
+        WHERE u.id = #{userId }
+          AND u.deleted = 0
+    </select>
+</mapper>
